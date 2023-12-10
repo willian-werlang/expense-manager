@@ -45,12 +45,12 @@ public class DepartmentService {
     }
 
     public DepartmentDTO parseResponse(Department department) {
-        return DepartmentDTO.builder()
-                .id(department.getId())
-                .name(department.getName())
-                .description(department.getDescription())
-                .active(department.isActive())
-                .build();
+        DepartmentDTO departmentDTO = new DepartmentDTO();
+        departmentDTO.setId(department.getId());
+        departmentDTO.setName(department.getName());
+        departmentDTO.setDescription(department.getDescription());
+        departmentDTO.setActive(department.isActive());
+        return departmentDTO;
     }
 
     public Department parseRequest(DepartmentDTO departmentDTO) {
