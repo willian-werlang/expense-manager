@@ -40,7 +40,7 @@ public class CategoryControllerTest {
     private CategoryRepository categoryRepository;
 
     @BeforeEach
-    void mockDepartmentRepository() {
+    void mockCategoryRepository() {
         lenient().when(categoryRepository.findById(anyLong())).thenAnswer(invocationOnMock -> {
             long id = invocationOnMock.getArgument(0);
             return CATEGORIES.stream().filter(e -> e.getId() == id).findFirst();

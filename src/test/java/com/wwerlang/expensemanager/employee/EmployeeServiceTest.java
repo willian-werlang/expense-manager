@@ -37,7 +37,7 @@ class EmployeeServiceTest {
     private DepartmentService departmentService;
 
     @BeforeEach
-    void mockDepartmentRepository() {
+    void mockEmployeeRepository() {
         lenient().when(employeeRepository.findById(anyLong())).thenAnswer(invocationOnMock -> {
             long id = invocationOnMock.getArgument(0);
             return EMPLOYEES.stream().filter(e -> e.getId() == id).findFirst();
