@@ -27,8 +27,7 @@ public class DepartmentControllerTest {
 
     private static final List<Department> DEPARTMENTS = List.of(
             new Department(1, "IT", "Fix computers.", true),
-            new Department(2, "HR", "Hires people.", true),
-            new Department(3, "Sales", "Sells stuff.", false)
+            new Department(2, "HR", "Hires people.", false)
     );
 
     @Autowired
@@ -51,7 +50,7 @@ public class DepartmentControllerTest {
 
         lenient().when(departmentRepository.save(any(Department.class))).thenAnswer(invocationOnMock -> {
             Department department = invocationOnMock.getArgument(0);
-            department.setId(department.getId() == 0 ? 1 : department.getId());
+            department.setId(department.getId() == 0 ? 3 : department.getId());
             return department;
         });
 
@@ -63,21 +62,21 @@ public class DepartmentControllerTest {
 
     @Test
     void testFind() throws Exception {
-        mockMvc.perform(get(PATH + "/{id}", 2))
+        mockMvc.perform(get(PATH + "/{id}", 1))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("2"))
-                .andExpect(jsonPath("$.name").value("HR"))
-                .andExpect(jsonPath("$.description").value("Hires people."))
+                .andExpect(jsonPath("$.id").value("1"))
+                .andExpect(jsonPath("$.name").value("IT"))
+                .andExpect(jsonPath("$.description").value("Fix computers."))
                 .andExpect(jsonPath("$.active").value(true));
     }
 
     @Test
     void testFindNonExistent() throws Exception {
-        String response = mockMvc.perform(get(PATH + "/{id}", 4))
+        String response = mockMvc.perform(get(PATH + "/{id}", 3))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        assertEquals("Department not found with ID 4.", response);
+        assertEquals("Department not found with ID 3.", response);
     }
 
     @Test
@@ -89,44 +88,44 @@ public class DepartmentControllerTest {
                 .andExpect(jsonPath("$[0].name").value("IT"))
                 .andExpect(jsonPath("$[0].description").value("Fix computers."))
                 .andExpect(jsonPath("$[0].active").value(true))
-                .andExpect(jsonPath("$[2].id").value("3"))
-                .andExpect(jsonPath("$[2].name").value("Sales"))
-                .andExpect(jsonPath("$[2].description").value("Sells stuff."))
-                .andExpect(jsonPath("$[2].active").value(false));
+                .andExpect(jsonPath("$[1].id").value("2"))
+                .andExpect(jsonPath("$[1].name").value("HR"))
+                .andExpect(jsonPath("$[1].description").value("Hires people."))
+                .andExpect(jsonPath("$[1].active").value(false));
     }
 
     @Test
     void testCreate() throws Exception {
-        String input = "{ \"name\": \"QA\", \"description\": \"Make sure products are good.\", \"active\": true }";
-
-        mockMvc.perform(post(PATH).contentType(MediaType.APPLICATION_JSON).content(input))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("1"))
-                .andExpect(jsonPath("$.name").value("QA"))
-                .andExpect(jsonPath("$.description").value("Make sure products are good."))
-                .andExpect(jsonPath("$.active").value(true));
-    }
-
-    @Test
-    void testUpdate() throws Exception {
-        String input = "{ \"id\": \"3\", \"name\": \"Sales\", \"description\": \"Sells stuff.\", \"active\": true }";
+        String input = "{ \"name\": \"Sales\", \"description\": \"Sell, sell, sell!\", \"active\": true }";
 
         mockMvc.perform(post(PATH).contentType(MediaType.APPLICATION_JSON).content(input))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("3"))
                 .andExpect(jsonPath("$.name").value("Sales"))
-                .andExpect(jsonPath("$.description").value("Sells stuff."))
+                .andExpect(jsonPath("$.description").value("Sell, sell, sell!"))
+                .andExpect(jsonPath("$.active").value(true));
+    }
+
+    @Test
+    void testUpdate() throws Exception {
+        String input = "{ \"id\": \"2\", \"name\": \"HR\", \"description\": \"Hires people.\", \"active\": true }";
+
+        mockMvc.perform(post(PATH).contentType(MediaType.APPLICATION_JSON).content(input))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("2"))
+                .andExpect(jsonPath("$.name").value("HR"))
+                .andExpect(jsonPath("$.description").value("Hires people."))
                 .andExpect(jsonPath("$.active").value(true));
     }
 
     @Test
     void testUpdateNonExistent() throws Exception {
-        String input = "{ \"id\": \"5\", \"name\": \"QA\", \"description\": \"Make sure products are good.\", \"active\": true }";
+        String input = "{ \"id\": \"3\", \"name\": \"Sales\", \"description\": \"Sell, sell, sell!\", \"active\": true }";
 
         String response = mockMvc.perform(post(PATH).contentType(MediaType.APPLICATION_JSON).content(input))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        assertEquals("Department not found with ID 5.", response);
+        assertEquals("Department not found with ID 3.", response);
     }
 }

@@ -20,8 +20,7 @@ class DepartmentServiceTest {
 
     private static final List<Department> DEPARTMENTS = List.of(
             new Department(1, "IT", "Fix computers.", true),
-            new Department(2, "HR", "Hires people.", true),
-            new Department(3, "Sales", "Sells stuff.", false)
+            new Department(2, "HR", "Hires people.", false)
     );
 
     @InjectMocks
@@ -41,7 +40,7 @@ class DepartmentServiceTest {
 
         lenient().when(departmentRepository.save(any(Department.class))).thenAnswer(invocationOnMock -> {
             Department department = invocationOnMock.getArgument(0);
-            department.setId(department.getId() == 0 ? 1 : department.getId());
+            department.setId(department.getId() == 0 ? 3 : department.getId());
             return department;
         });
 
@@ -53,22 +52,23 @@ class DepartmentServiceTest {
 
     @Test
     void testFind() {
-        DepartmentDTO departmentDTO = departmentService.find(1L);
-        assertEquals(1, departmentDTO.getId());
-        assertEquals("IT", departmentDTO.getName());
-        assertEquals("Fix computers.", departmentDTO.getDescription());
-        assertTrue(departmentDTO.isActive());
+        DepartmentDTO department = departmentService.find(1L);
+        assertEquals(1, department.getId());
+        assertEquals("IT", department.getName());
+        assertEquals("Fix computers.", department.getDescription());
+        assertTrue(department.isActive());
     }
 
     @Test
     void testFindNonExistent() {
-        EntityNotFoundException e = assertThrows(EntityNotFoundException.class, () -> departmentService.find(4L));
-        assertEquals("Department not found with ID 4.", e.getMessage());
+        EntityNotFoundException e = assertThrows(EntityNotFoundException.class, () -> departmentService.find(3L));
+        assertEquals("Department not found with ID 3.", e.getMessage());
     }
 
     @Test
     void testList() {
         List<DepartmentDTO> departments = departmentService.list();
+        assertEquals(2, departments.size());
 
         assertEquals(1, departments.get(0).getId());
         assertEquals("IT", departments.get(0).getName());
@@ -78,62 +78,57 @@ class DepartmentServiceTest {
         assertEquals(2, departments.get(1).getId());
         assertEquals("HR", departments.get(1).getName());
         assertEquals("Hires people.", departments.get(1).getDescription());
-        assertTrue(departments.get(1).isActive());
-
-        assertEquals(3, departments.get(2).getId());
-        assertEquals("Sales", departments.get(2).getName());
-        assertEquals("Sells stuff.", departments.get(2).getDescription());
-        assertFalse(departments.get(2).isActive());
+        assertFalse(departments.get(1).isActive());
     }
 
     @Test
     void testCreate() {
-        DepartmentDTO department = new DepartmentDTO(0, "IT", "Fix computers.", true);
+        DepartmentDTO department = new DepartmentDTO(0, "Sales", "Sell, sell, sell!", true);
         department = departmentService.save(department);
 
-        assertEquals(1, department.getId());
-        assertEquals("IT", department.getName());
-        assertEquals("Fix computers.", department.getDescription());
+        assertEquals(3, department.getId());
+        assertEquals("Sales", department.getName());
+        assertEquals("Sell, sell, sell!", department.getDescription());
         assertTrue(department.isActive());
     }
 
     @Test
     void testUpdate() {
-        DepartmentDTO department = new DepartmentDTO(2, "Sales", "Sells stuff.", false);
+        DepartmentDTO department = new DepartmentDTO(2, "HR", "Hires people.", true);
         department = departmentService.save(department);
 
         assertEquals(2, department.getId());
-        assertEquals("Sales", department.getName());
-        assertEquals("Sells stuff.", department.getDescription());
-        assertFalse(department.isActive());
+        assertEquals("HR", department.getName());
+        assertEquals("Hires people.", department.getDescription());
+        assertTrue(department.isActive());
     }
 
     @Test
     void testUpdateNonExistent() {
-        DepartmentDTO departmentDTO = new DepartmentDTO(4, "IT", "Fix computers.", true);
-        EntityNotFoundException e = assertThrows(EntityNotFoundException.class, () -> departmentService.save(departmentDTO));
-        assertEquals("Department not found with ID 4.", e.getMessage());
+        DepartmentDTO department = new DepartmentDTO(3, "Sales", "Sell, sell, sell!", true);
+        EntityNotFoundException e = assertThrows(EntityNotFoundException.class, () -> departmentService.save(department));
+        assertEquals("Department not found with ID 3.", e.getMessage());
     }
 
     @Test
     void testParseResponse() {
-        Department department = new Department(2, "Sales", "Sells stuff.", false);
+        Department department = new Department(1, "IT", "Fix computers.", true);
         DepartmentDTO departmentDTO = departmentService.parseResponse(department);
 
-        assertEquals(2, departmentDTO.getId());
-        assertEquals("Sales", departmentDTO.getName());
-        assertEquals("Sells stuff.", departmentDTO.getDescription());
-        assertFalse(departmentDTO.isActive());
+        assertEquals(1, departmentDTO.getId());
+        assertEquals("IT", departmentDTO.getName());
+        assertEquals("Fix computers.", departmentDTO.getDescription());
+        assertTrue(departmentDTO.isActive());
     }
 
     @Test
     void testParseRequest() {
-        DepartmentDTO departmentDTO = new DepartmentDTO(1, "IT", "Fix computers.", true);
+        DepartmentDTO departmentDTO = new DepartmentDTO(2, "HR", "Hires people.", false);
         Department department = departmentService.parseRequest(departmentDTO);
 
-        assertEquals(1, department.getId());
-        assertEquals("IT", department.getName());
-        assertEquals("Fix computers.", department.getDescription());
-        assertTrue(department.isActive());
+        assertEquals(2, department.getId());
+        assertEquals("HR", department.getName());
+        assertEquals("Hires people.", department.getDescription());
+        assertFalse(department.isActive());
     }
 }
